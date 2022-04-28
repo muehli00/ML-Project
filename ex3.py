@@ -25,20 +25,43 @@ class ImageStandardizer():
             raise ValueError
 
     def analyze_images(self):
+
+        std = np.array([0, 0, 0], dtype=np.float32)
+        mean = np.array([0, 0, 0], dtype=np.float32)
         for file in self.files:
             try:
                 image_ = Image.open(file)
                 arr = np.array(image_)
-                self.std = (arr.std(axis=(0, 1)))
-                self.mean = (arr.mean(axis=(0, 1)))
-                print(self.mean)
-            except OSError:
-                print(f'Image {self.files}')
+                std = std + (arr.std(axis=(0, 1)))
+                mean = mean + (arr.mean(axis=(0, 1)))
 
+            except OSError:
+                print(f'Image {self.files} could not be opened')
+
+        self.mean = mean/len(self.files)
+        self.std = std/len(self.files)
+        # print(self.std.dtype)
+
+        return self.mean, self.std
 
 
     def get_standardized_images(self):
-        pass
+        if self.mean is None or self.std is None:
+            raise ValueError
+
+        for file in self.files:
+            try:
+                image_ = Image.open(file)
+                standardized_data = np.array(((np.array(image_, dtype=np.float32) - self.mean)/self.std), dtype=np.float32)
+
+                yield standardized_data
+
+
+
+            except OSError:
+                print(f'Image {self.files} could not be opened')
+
+
 
 
 
@@ -49,10 +72,24 @@ class ImageStandardizer():
 
 
 if __name__ == "__main__":
+    # For testing...
+
+
     ImageStandardizer = ImageStandardizer(input_dir='unittest\\unittest_input_1')
     ImageStandardizer.analyze_images()
+    gen = ImageStandardizer.get_standardized_images()
+    for i, data in enumerate(gen):
+        # print(data)
+        if i > 2:
+            break
+
+
 
     for path in ImageStandardizer.files:
         if path.endswith('.jpg'):#
-            print(path)
+            pass
+            # print(path)
     # print(ImageStandardizer.image_files)
+
+    imagedata = ImageStandardizer.get_standardized_images()
+    print(type(imagedata))
