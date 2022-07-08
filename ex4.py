@@ -4,6 +4,9 @@ Matr.Nr.: K12110857
 Exercise 4
 """
 import numpy as np
+import torch
+
+
 
 
 def check_int_obj(tuple, lowerbound, upperbound):
